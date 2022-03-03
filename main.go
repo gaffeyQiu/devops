@@ -17,6 +17,8 @@ limitations under the License.
 package main
 
 import (
+	"devops.io/devops/pkg/client/devops"
+	"devops.io/devops/pkg/client/devops/jenkins"
 	"flag"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
@@ -88,8 +90,9 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.PipelineReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:       mgr.GetClient(),
+		Scheme:       mgr.GetScheme(),
+		DevopsClient: getJenkinsCli(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Pipeline")
 		os.Exit(1)
@@ -110,4 +113,8 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func getJenkinsCli() devops.Interface {
+	return jenkins.CreateJenkinsClient("http://localhost:8080", "admin", "B0J9N43z5MlijWzjKAaSem")
 }

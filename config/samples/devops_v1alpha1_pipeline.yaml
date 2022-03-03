@@ -4,6 +4,7 @@ metadata:
   name: test-pipeline
   namespace: test
 spec:
+  action: "create"
   pipeline:
     discarder:
       days_to_keep: "1"
@@ -19,5 +20,5 @@ spec:
           }
         }
       }
-    name: hello
+    name: test-pipeline
     description: "这是测试 cr"

@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	devopsClient "devops.io/devops/pkg/client/devops"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -30,7 +32,8 @@ import (
 // PipelineReconciler reconciles a Pipeline object
 type PipelineReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme       *runtime.Scheme
+	DevopsClient devopsClient.Interface
 }
 
 //+kubebuilder:rbac:groups=devops.devops.io,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
@@ -48,11 +51,45 @@ type PipelineReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-	// todo(qiujf)
-	// 1. 拿到 状态变化
-	// 2. 开始调用 jenkins 接口创建流水线
-	// 3. 返回
-	klog.Info(req.String())
+	// 1. 获取到 cr 结构体
+	var pipeline devopsv1alpha1.Pipeline
+	if err := r.Get(ctx, req.NamespacedName, &pipeline); err != nil {
+		if errors.IsNotFound(err) {
+			klog.Errorf("未获取到 pipeline 资源，%s", err.Error())
+		}
+
+		klog.Errorf("发生错误 %s", err.Error())
+		return ctrl.Result{}, nil
+	}
+
+	var devopsClientErr error
+	var build *devopsv1alpha1.Build
+	switch pipeline.Spec.Action {
+	case devopsv1alpha1.PipelineCreate:
+		devopsClientErr = r.DevopsClient.CreatePipeline(&pipeline)
+	case devopsv1alpha1.PipelineUpdate:
+		// todo()
+	case devopsv1alpha1.PipelineDelete:
+		// todo()
+	case devopsv1alpha1.PipelineRun:
+		build, devopsClientErr = r.DevopsClient.RunPipeline(&pipeline)
+	default:
+		klog.Errorf("未能识别的 pipeline action: %s", pipeline.Spec.Action)
+		return ctrl.Result{}, nil
+	}
+
+	if devopsClientErr != nil {
+		klog.Errorf("devopsclient has err: %s", devopsClientErr.Error())
+		return ctrl.Result{}, nil
+	}
+
+	if build != nil {
+		pipeline.Status.LastBuild = build
+		if err := r.Update(ctx, &pipeline); err != nil {
+			klog.Errorf("Update Pipeline Status Build error: %s", err.Error())
+			return ctrl.Result{}, err
+		}
+	}
 	return ctrl.Result{}, nil
 }
 

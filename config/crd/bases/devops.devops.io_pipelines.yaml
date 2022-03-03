@@ -36,8 +36,16 @@ spec:
           spec:
             description: PipelineSpec defines the desired state of Pipeline
             properties:
+              action:
+                description: 流水线操作
+                enum:
+                - create
+                - update
+                - delete
+                - run
+                type: string
               pipeline:
-                description: ' 仅测试传入 jenkinsfile 的流水线'
+                description: 仅测试传入 jenkinsfile 的流水线
                 properties:
                   description:
                     type: string
@@ -55,9 +63,25 @@ spec:
                 required:
                 - name
                 type: object
+            required:
+            - action
             type: object
           status:
             description: PipelineStatus defines the observed state of Pipeline
+            properties:
+              last_build_number:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                properties:
+                  build_number:
+                    type: string
+                  result:
+                    type: string
+                required:
+                - build_number
+                - result
+                type: object
             type: object
         type: object
     served: true

@@ -23,9 +23,21 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// +kubebuilder:validation:Enum=create;update;delete;run
+type PipelineAction string
+
+const (
+	PipelineCreate PipelineAction = "create"
+	PipelineUpdate PipelineAction = "update"
+	PipelineDelete PipelineAction = "delete"
+	PipelineRun    PipelineAction = "run"
+)
+
 // PipelineSpec defines the desired state of Pipeline
 type PipelineSpec struct {
-	//  仅测试传入 jenkinsfile 的流水线
+	// 流水线操作
+	Action PipelineAction `json:"action"`
+	// 仅测试传入 jenkinsfile 的流水线
 	Pipeline *NoScmPipeline `json:"pipeline,omitempty" description:"no scm pipeline structs"`
 }
 
@@ -33,6 +45,12 @@ type PipelineSpec struct {
 type PipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	LastBuild *Build `json:"last_build_number,omitempty"`
+}
+
+type Build struct {
+	Number string `json:"build_number"`
+	Result string `json:"result"`
 }
 
 //+kubebuilder:object:root=true
