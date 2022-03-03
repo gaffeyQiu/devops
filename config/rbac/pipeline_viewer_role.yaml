@@ -1,0 +1,20 @@
+# permissions for end users to view pipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pipeline-viewer-role
+rules:
+- apiGroups:
+  - devops.devops.io
+  resources:
+  - pipelines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - devops.devops.io
+  resources:
+  - pipelines/status
+  verbs:
+  - get

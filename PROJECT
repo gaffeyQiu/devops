@@ -1,0 +1,25 @@
+domain: devops.io
+layout:
+- go.kubebuilder.io/v3
+projectName: devops
+repo: devops.io/devops
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: devops.io
+  group: devops
+  kind: Project
+  path: devops.io/devops/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: devops.io
+  group: devops
+  kind: Pipeline
+  path: devops.io/devops/api/v1alpha1
+  version: v1alpha1
+version: "3"

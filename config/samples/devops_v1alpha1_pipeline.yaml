@@ -1,0 +1,23 @@
+apiVersion: devops.devops.io/v1alpha1
+kind: Pipeline
+metadata:
+  name: test-pipeline
+  namespace: test
+spec:
+  pipeline:
+    discarder:
+      days_to_keep: "1"
+      num_to_keep: "3"
+    jenkinsfile: |
+      pipeline {
+        agent any
+        stages {
+          stage("Hello") {
+            steps {
+              sh "hello devops!"
+            }
+          }
+        }
+      }
+    name: hello
+    description: "这是测试 cr"
